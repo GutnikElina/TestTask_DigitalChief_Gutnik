@@ -1,0 +1,72 @@
+services:
+  app:
+    image: test-task
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/products
+      SPRING_DATASOURCE_USERNAME: products_user
+      SPRING_DATASOURCE_PASSWORD: products_password
+      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+
+  db:
+    image: postgres:16.0
+    environment:
+      POSTGRES_DB: products
+      POSTGRES_USER: products_user
+      POSTGRES_PASSWORD: products_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  elasticsearch:
+    image: elasticsearch:7.17.24
+    environment:
+      discovery.type: single-node
+      ELASTIC_USERNAME: elastic
+      ELASTIC_PASSWORD: elastic
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  setup-index:
+    image: curlimages/curl:7.82.0
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    entrypoint: >
+      sh -c '
+      echo "Waiting for Elasticsearch to be ready..." &&
+      until $(curl --output /dev/null --silent --head --fail http://elasticsearch:9200); do
+        sleep 5
+      done &&
+      echo "Elasticsearch is ready! Checking for the index..." &&
+      if curl --head --fail http://elasticsearch:9200/products; then
+        echo "Index already exists"
+      else
+        echo "Creating index..." &&
+        curl -X PUT "http://elasticsearch:9200/products" -H "Content-Type: application/json" -d @/resources/elasticsearch-settings.json
+      fi
+      '
+    volumes:
+      - ./src/main/resources:/resources
+
+volumes:
+  postgres_data:
+  elasticsearch_data:
