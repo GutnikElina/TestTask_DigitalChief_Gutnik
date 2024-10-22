@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -76,6 +78,7 @@ public class DataLoadService {
             IndexRequest indexRequest = new IndexRequest(INDEX_NAME)
                     .id(String.valueOf(product.getId()))
                     .source(buildProductJson(product));
+
             bulkRequest.add(indexRequest);
             log.info("-> Preparing to load product: {}", product.getName());
         } catch (IOException e) {
@@ -96,14 +99,25 @@ public class DataLoadService {
         }
     }
 
+    private String formatDate(LocalDate date) {
+        if (date != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            return date.format(formatter);
+        }
+        return null;
+    }
+
     private XContentBuilder buildProductJson(Product product) throws IOException {
         XContentBuilder builder = XContentFactory.jsonBuilder();
         builder.startObject()
                 .field("id", product.getId())
                 .field("name", product.getName())
                 .field("description", product.getDescription())
-                .field("active", product.isActive())
-                .field("startDate", product.getStartDate() != null ? product.getStartDate().toInstant().toString() : null);
+                .field("active", product.isActive());
+
+        String formattedDate = product.getStartDate() != null ? product.getStartDate().format(DateTimeFormatter.ISO_DATE) : null;
+        log.info("-> Formatted startDate for product {}: {}", product.getId(), formattedDate);
+        builder.field("startDate", formattedDate);
 
         builder.startArray("skuList");
         if (product.getSkuList() != null) {
@@ -111,7 +125,7 @@ public class DataLoadService {
                 builder.startObject()
                         .field("id", sku.getId())
                         .field("skuCode", sku.getSkuCode())
-                        .field("price", sku.getPrice())
+                        .field("price", sku.getPrice() != null ? sku.getPrice().doubleValue() : null)
                         .endObject();
             }
         }
@@ -120,4 +134,7 @@ public class DataLoadService {
         builder.endObject();
         return builder;
     }
+
+
 }
+

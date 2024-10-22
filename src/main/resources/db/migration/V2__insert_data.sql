@@ -18,8 +18,7 @@ INSERT INTO product (name, description, active, start_date) VALUES
                                                                 ('Фен Dyson', 'Фен с технологией защиты от перегрева', TRUE, '2023-07-05'),
                                                                 ('Фен Xiaomi', 'Фен с умными функциями и сушки', TRUE, '2023-08-17'),
                                                                 ('Смарт-часы Apple Watch', 'Новые смарт-часы с расширенными функциями здоровья', FALSE, '2023-09-22'),
-                                                                ('Смарт-часы Samsung Galaxy', 'Смарт-часы с длительным временем работы', TRUE, '2023-10-11'),
-                                                                ('Смарт-часы Huawei Watch', 'Смарт-часы с высоким качеством сборки', FALSE, '2023-01-15');
+                                                                ('Смарт-часы Samsung Galaxy', 'Смарт-часы с длительным временем работы', TRUE, '2023-10-11');
 
 INSERT INTO sku (product_id, sku_code, price) VALUES
                                                   (1, 'SKU-LENOVO-003', 1350.00),

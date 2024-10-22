@@ -20,6 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,12 +56,13 @@ public class ElasticSearchService {
 
         if (startDateFilter != null && !startDateFilter.isEmpty()) {
             try {
-                String startDateTime = startDateFilter + "T00:00:00Z";
-                String endDateTime = startDateFilter + "T23:59:59Z";
+                LocalDate startDate = LocalDate.parse(startDateFilter);
+                Instant startInstant = startDate.atStartOfDay(ZoneId.of("UTC")).toInstant();
+                Instant endInstant = startDate.plusDays(1).atStartOfDay(ZoneId.of("UTC")).toInstant();
 
                 boolQuery.filter(QueryBuilders.rangeQuery("startDate")
-                        .gte(Instant.parse(startDateTime))
-                        .lte(Instant.parse(endDateTime)));
+                        .gte(startInstant)
+                        .lte(endInstant));
             } catch (DateTimeParseException e) {
                 log.error("! Invalid startDate format: {}", e.getMessage());
             }
@@ -111,7 +115,8 @@ public class ElasticSearchService {
         String startDateString = (String) source.get("startDate");
         if (startDateString != null) {
             try {
-                product.setStartDate(Date.from(Instant.parse(startDateString)));
+                LocalDate startDate = LocalDate.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE);
+                product.setStartDate(startDate);
             } catch (DateTimeParseException e) {
                 log.error("! Error parsing date: {}", e.getMessage());
             }
@@ -120,4 +125,6 @@ public class ElasticSearchService {
         product.setSkuList((List<SKU>) source.get("skuList"));
         return product;
     }
+
+
 }

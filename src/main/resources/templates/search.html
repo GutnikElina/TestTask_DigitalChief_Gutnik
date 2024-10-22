@@ -89,6 +89,21 @@
             font-size: 1.3em;
         }
 
+        .sku-list {
+            margin-top: 10px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .sku-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sku-item:last-child {
+            border-bottom: none;
+        }
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -107,6 +122,13 @@
         .pagination a:hover {
             background-color: #007bff;
             color: #fff;
+        }
+
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
         }
 
         @media (max-width: 600px) {
@@ -143,7 +165,16 @@
             <h3 th:text="${product.name}">Product Name</h3>
             <p th:text="${product.description}">Product Description</p>
             <p th:text="${product.active ? 'Active' : 'Inactive'}">Status</p>
-            <p class="date" th:text="${#dates.format(product.startDate, 'dd MMMM yyyy')}">Start Date</p>
+            <p class="date" th:if="${product.startDateAsDate}" th:text="${#dates.format(product.startDateAsDate, 'dd MMMM yyyy')}">Start Date</p>
+            <p class="date" th:if="${product.startDate == null}">No start date available</p>
+
+            <div class="sku-list">
+                <h4>SKU:</h4>
+                <div th:each="sku : ${product.skuList}" class="sku-item">
+                    <p th:text="'SKU Code: ' + ${sku.skuCode}"></p>
+                    <p th:text="'SKU Price: ' + ${sku.price}"></p>
+                </div>
+            </div>
         </div>
 
         <div class="pagination">

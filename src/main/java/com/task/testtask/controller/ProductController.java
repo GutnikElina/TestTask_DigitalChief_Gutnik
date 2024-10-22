@@ -41,7 +41,6 @@ public class ProductController {
         if (productsPage.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-
         return ResponseEntity.ok(productsPage.getContent());
     }
 

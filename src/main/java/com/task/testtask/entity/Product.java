@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -20,9 +22,24 @@ public class Product {
     private String name;
     private String description;
     private boolean active;
-    @Column(name="start_date")
-    private Date startDate;
+    private LocalDate startDate;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    private List<SKU> skuList;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SKU> skuList = new ArrayList<>();
+
+    @Transient
+    public Date getStartDateAsDate() {
+        return startDate != null ? java.sql.Date.valueOf(startDate) : null;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", active=" + active +
+                ", startDate=" + startDate +
+                '}';
+    }
 }

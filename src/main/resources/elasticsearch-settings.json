@@ -21,8 +21,24 @@
           }
         }
       },
-      "active": { "type": "boolean" },
-      "startDate": { "type": "date" }
+      "active": {
+        "type": "boolean"
+      },
+      "startDate": {
+        "type": "date",
+        "format": "yyyy-MM-dd"
+      },
+      "skuList": {
+        "type": "nested",
+        "properties": {
+          "skuCode": {
+            "type": "keyword"
+          },
+          "price": {
+            "type": "double"
+          }
+        }
+      }
     }
   }
 }
