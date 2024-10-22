@@ -11,6 +11,7 @@
 
 ## Установка
 
+Откройте консоль (например, PowerShell) для выполнения команд.
 1. Клонирование репозитория:
    ```bash
    git clone https://github.com/GutnikElina/TestTask_DigitalChief_Gutnik
